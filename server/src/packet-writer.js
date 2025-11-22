@@ -1104,9 +1104,15 @@ PacketWriter.prototype.__slicePacket = function() {
 PacketWriter.prototype.__escapeHTML = function(message) {
 
   /*
-   * Function PacketWriter.__escapeHTML
    * Escapes unsafe HTML characters to prevent XSS attacks
    */
+
+  // Asegurarnos de que trabajamos con string
+  if (message === null || message === undefined) {
+    message = "";
+  } else if (typeof message !== "string") {
+    message = String(message);
+  }
 
   return message.replaceAll("&", "&amp;")
                 .replaceAll("<", "&lt;")
