@@ -119,7 +119,7 @@ Keyboard.prototype.handleInput = function() {
     }
 
     // Shift is being held down: rotate
-    if(this.isShiftDown()) {
+    if(this.isControlDown()) {
       return this.__handleCharacterRotate(key);
     }
 
