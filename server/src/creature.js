@@ -480,13 +480,31 @@ Creature.prototype.internalCreatureSay = function(message, color) {
 
   /*
    * Function Creature.internalCreatureSay
-   * Writes a creature message to all spectators
+   * Writes a creature message to all spectators (using world.broadcastPosition)
    */
+
+  // Sin posición no hay nada que hacer
+  if (this.position === null) {
+    return;
+  }
+
+  // Preparamos el paquete de CREATURE_SAY
+  const packet = new PacketWriter(
+    PacketWriter.prototype.opcodes.CREATURE_SAY
+  ).writeCreatureSay(this, message, color);
+
+  // ✅ Enviar a todos los observadores de esta posición
+  process.gameServer.world.broadcastPosition(this.position, packet);
+
+};
+
+/*
+Creature.prototype.internalCreatureSay = function(message, color) {
 
   // Write to the floor
   this.broadcastFloor(new PacketWriter(PacketWriter.prototype.opcodes.CREATURE_SAY).writeCreatureSay(this, message, color));
 
-}
+}*/
 
 Creature.prototype.privateSay = function(player, message, color) {
 
