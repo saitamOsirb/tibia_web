@@ -53,6 +53,19 @@ BattleWindow.prototype.addCreature = function(creature) {
    * Updates the DOM with the targeted creature
    */
 
+  // Nada que hacer sin criatura
+  if (!creature) {
+    return;
+  }
+
+  // ❌ No me agrego a mí mismo a la battle window
+  if (creature === gameClient.player) {
+    return;
+  }
+
+  // ❌ Evitar duplicados: si ya existe una fila con este id, eliminarla
+  this.removeCreature(creature.id);
+
   //if(creature.type !== 1) return;
   // Create the target node and add
   let node = document.getElementById("battle-window-target").cloneNode(true);
@@ -62,7 +75,7 @@ BattleWindow.prototype.addCreature = function(creature) {
   // Create a new canvas
   let canvas = new Canvas(node.lastElementChild.firstElementChild, 64, 64);
 
-  let frames =  creature.getCharacterFrames();
+  let frames = creature.getCharacterFrames();
   let zPattern = (frames.characterGroup.pattern.z > 1 && creature.isMounted()) ? 1 : 0;
 
   // Call to draw the character
@@ -94,7 +107,10 @@ BattleWindow.prototype.addCreature = function(creature) {
   node.addEventListener("click", function() {
     let creature = gameClient.world.getCreature(this.id);
     gameClient.player.setTarget(creature);
-    gameClient.send(new PacketWriter(PacketWriter.prototype.opcodes.TARGET_CREATURE).writeTargetCreature(this.id));
+    gameClient.send(
+      new PacketWriter(PacketWriter.prototype.opcodes.TARGET_CREATURE)
+        .writeTargetCreature(this.id)
+    );
   });
 
-}
+};

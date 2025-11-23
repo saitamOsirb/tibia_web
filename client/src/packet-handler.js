@@ -928,9 +928,9 @@ PacketHandler.prototype.handleDefaultMessage = function(packet) {
   }
 
   // Only when visible (client-side check)
-  if(!gameClient.player.canSeeSmall(entity)) {
-    return;
-  }
+  //if(!gameClient.player.canSeeSmall(entity)) {
+  //  return;
+  //}
 
   entity.say(packet);
 

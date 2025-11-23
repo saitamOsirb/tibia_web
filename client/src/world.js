@@ -169,19 +169,27 @@ World.prototype.__handleCreatureMove = function(id, position, speed) {
 
 World.prototype.createCreature = function(id, creature) {
 
-  /*
-   * Function World.createCreature
-   * Creates a creature by adding it to cache
-   */
+    // Si YA existe, NO volver a crearla
+    if (this.activeCreatures[id]) {
 
-  // Set and add
-  this.activeCreatures[id] = creature;
-  this.addCreature(creature);
+        // actualizamos solo los datos necesarios
+        Object.assign(this.activeCreatures[id], creature);
 
-  return gameClient.interface.windowManager.getWindow("battle-window").addCreature(creature);
+        // NO agregar de nuevo al battle window
+        return;
+    }
 
+    // Criatura nueva
+    this.activeCreatures[id] = creature;
+    this.addCreature(creature);
+
+    // No agregarse a sí mismo
+    if (creature !== gameClient.player) {
+        gameClient.interface.windowManager
+            .getWindow("battle-window")
+            .addCreature(creature);
+    }
 }
-
 World.prototype.getCreature = function(id) {
 
   /*

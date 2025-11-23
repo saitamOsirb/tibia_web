@@ -113,7 +113,7 @@ IPCSocket.prototype.__internalHandlePacket = function(packet) {
       process.gameServer.__scheduleShutdown(packet.readUInt16());
       break;
     case 0x01:
-      throw("");
+      //throw("");
       process.gameServer.broadcast(packet.readString16());
       break;
     case 0x02:
