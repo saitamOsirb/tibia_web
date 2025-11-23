@@ -1,21 +1,25 @@
 .equipment-options-wrapper {
   display: flex;
+  flex-direction: column;  /* inventory/equipment arriba, botones abajo */
   margin: 8px;
 }
 
+/* Contenedor de los botones (Stats, Battle, Outfit, Friends, Settings, Logout) */
 .equipment-buttons {
-  flex: 1 1 auto;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin: 4px;
+  display: grid;
+  grid-template-columns: repeat(4, 16px);  /* 👉 4 iconos por fila */
+  grid-auto-rows: 16px;
+  gap: 2px;                                /* separación pequeñita */
+  margin-top: 4px;
+  align-self: flex-start;
 }
 
+/* Tamaño base de cada botón en la grilla */
 .equipment-buttons button {
-  width: 100%;
-  margin: 2px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin: 0;
 }
 
 .character-status {
@@ -130,4 +134,178 @@
   text-align: center;
   font-size: 10px;
   min-height: 24px;
+}
+
+/* Botón Stats con icono ON/OFF */
+#openSkills.equipment-button-skills,
+.equipment-button-skills {
+  width: 16px;              /* igual que tu icono (20x20) */
+  height: 16px;
+  padding: 0;
+  margin: 0;
+
+  /* Quitar estilos globales de button */
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+
+  /* Poner la imagen como fondo */
+  background-image: url("../png/buttons/button-skills-up.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  text-indent: -9999px;  /* por si algo le mete texto */
+  overflow: hidden;
+}
+
+/* Estado ON (ventana de stats abierta) */
+#openSkills.equipment-button-skills.active {
+  background-image: url("../png/buttons/button-skills-down.png");
+}
+
+/* Botón Friends con icono ON/OFF */
+#openFriends.equipment-button-friends,
+.equipment-button-friends {
+  width: 16px;              /* mismo tamaño que el icono (20x20) */
+  height: 16px;
+  padding: 0;
+  margin: 0;
+
+  /* Quitar estilos globales de button */
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+
+  /* Imagen por defecto (OFF) */
+  background-image: url("../png/buttons/button-social-up.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  text-indent: -9999px;   /* por si metemos texto */
+  overflow: hidden;
+}
+
+/* Estado ON (ventana friends abierta) */
+#openFriends.equipment-button-friends.active {
+  background-image: url("../png/buttons/button-social-down.png");
+}
+
+/* Botón Settings con icono ON/OFF */
+#openSettings.equipment-button-settings,
+.equipment-button-settings {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin: 0;
+
+  /* Quitar estilos globales del <button> */
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+
+  /* Imagen por defecto (OFF) */
+  background-image: url("../png/buttons/button-options-up.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  text-indent: -9999px;
+  overflow: hidden;
+}
+
+/* Estado ON (settings abierto) */
+#openSettings.equipment-button-settings.active {
+  background-image: url("../png/buttons/button-options-down.png");
+}
+
+/* Botón Battle con icono ON/OFF */
+#openBattle.equipment-button-battle,
+.equipment-button-battle {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin: 0;
+
+  /* Quitar estilos globales del <button> */
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+
+  /* Imagen por defecto (OFF) */
+  background-image: url("../png/buttons/button-battlelist-up.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  text-indent: -9999px;
+  overflow: hidden;
+}
+
+/* Estado ON (ventana Battle abierta) */
+#openBattle.equipment-button-battle.active {
+  background-image: url("../png/buttons/button-battlelist-down.png");
+}
+
+#logout-button.equipment-button-logout,
+.equipment-button-logout {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin: 0;
+
+  /* quitar estilos por defecto del <button> */
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+
+  /* imagen por defecto (UP) */
+  background-image: url("../png/buttons/button-logout-up.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  text-indent: -9999px;
+  overflow: hidden;
+}
+
+/* Mostrar imagen DOWN mientras se interactúa (click/hover) */
+#logout-button.equipment-button-logout:hover,
+#logout-button.equipment-button-logout:active {
+  background-image: url("../png/buttons/button-logout-down.png");
+}
+
+/* Botón Outfit con icono ON/OFF */
+#openOutfit.equipment-button-outfit,
+.equipment-button-outfit {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin: 0;
+
+  /* quitar estilos por defecto del <button> */
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+
+  /* imagen por defecto (OFF) */
+  background-image: url("../png/buttons/button-viplist-up.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  text-indent: -9999px;
+  overflow: hidden;
+}
+
+/* Estado ON (ventana Outfit abierta) */
+#openOutfit.equipment-button-outfit.active {
+  background-image: url("../png/buttons/button-viplist-down.png");
 }

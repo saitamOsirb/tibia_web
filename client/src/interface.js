@@ -297,6 +297,29 @@ Interface.prototype.toggleWindow = function (which) {
 
   this.windowManager.getWindow(which).toggle();
 
+  // Actualizar el estado del botón para ventanas con icono ON/OFF
+  if (which === "skill-window") {
+    var skillsButton = document.getElementById("openSkills");
+    if (skillsButton) {
+      skillsButton.classList.toggle("active");
+    }
+  } else if (which === "friend-window") {
+    var friendsButton = document.getElementById("openFriends");
+    if (friendsButton) {
+      friendsButton.classList.toggle("active");
+    }
+  } else if (which === "friend-window") {
+    var friendsButton = document.getElementById("openFriends");
+    if (friendsButton) {
+      friendsButton.classList.toggle("active");
+    }
+  } else if (which === "outfit-window") {
+    var outfitButton = document.getElementById("openOutfit");
+    if (outfitButton) {
+      outfitButton.classList.toggle("active");
+    }
+  }
+
 }
 
 Interface.prototype.setCancelMessage = function (message) {
@@ -470,12 +493,8 @@ Interface.prototype.addAvailableResolutions = function () {
 
 }
 
+/*
 Interface.prototype.getResolutionScale = function () {
-
-  /*
-   * Function Interface.getResolutionScale
-   * Returns the required scale of the game screen canvas
-   */
 
   // Fixed resolution is requested: divide the requested with by the minimum width to get the scale
   if (document.getElementById("enable-resolution").checked) {
@@ -489,6 +508,33 @@ Interface.prototype.getResolutionScale = function () {
   // Limit the scale to the minimum or maximum of the available width / height
   return Math.max(1, Math.min(scaleX, scaleY));
 
+}*/
+
+Interface.prototype.getResolutionScale = function () {
+
+  /*
+   * Function Interface.getResolutionScale
+   * Returns the required scale of the game screen canvas
+   */
+
+  // Fixed resolution is requested
+  if (document.getElementById("enable-resolution").checked) {
+
+    let raw = Number(document.getElementById("resolution").value) / this.SCREEN_WIDTH_MIN;
+
+    // mínimo 1, y redondear a entero para evitar líneas entre tiles
+    let scale = Math.max(1, raw);
+    return Math.round(scale);
+  }
+
+  // Dynamic resolution (restamos interfaz)
+  let scaleX = (window.visualViewport.width - 360) / this.SCREEN_WIDTH_MIN;
+  let scaleY = (window.visualViewport.height - 188) / this.SCREEN_HEIGHT_MIN;
+
+  let raw = Math.max(1, Math.min(scaleX, scaleY));
+
+  // 🔴 IMPORTANTE: redondear a entero
+  return Math.round(raw);
 }
 
 Interface.prototype.__handleStackResize = function () {

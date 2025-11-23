@@ -1,6 +1,6 @@
 const SERVER_HOST = "127.0.0.1";
 const SERVER_PORT = "2222";
-const CLIENT_VERSION = "0.0.1";
+const CLIENT_VERSION = "0.0.8";
 
 window.onload = function windowOnLoad() {
 
@@ -24,3 +24,5 @@ document.addEventListener("DOMContentLoaded", function DOMContentLoaded() {
   document.getElementById("enter-game").disabled = true;
 
 });
+
+

@@ -386,6 +386,8 @@
           <button id="load-assets">Load Assets</button>
           <button id="settings">Options</button>
           <button id="information">Information</button>
+          <button id="download">Download</button>
+          <a id="hidden-download" href="downloads/client.zip" download style="display:none;"></a>
         </div>
 
       </div>
@@ -883,12 +885,12 @@
             </div>
             
             <div class="equipment-buttons">
-              <button id="openSkills">Stats</button>
-              <button id="openBattle">Battle</button>
-              <button id="openOutfit">Outfit</button>
-              <button id="openFriends">Friends</button>
-              <button id="openSettings">Settings</button>
-              <button id="logout-button">Logout</button>
+              <button id="openSkills" class="equipment-button-skills" aria-label="Stats"></button>
+              <button id="openBattle" class="equipment-button-battle" aria-label="Battle"></button>
+              <button id="openOutfit" class="equipment-button-outfit" aria-label="Outfit"></button>
+              <button id="openFriends" class="equipment-button-friends" aria-label="Friends"></button>
+              <button id="openSettings" class="equipment-button-settings" aria-label="Settings"></button>
+              <button id="logout-button" class="equipment-button-logout" aria-label="Logout"></button>
             </div>
           
           </div>
@@ -1041,3 +1043,10 @@
   </body>
 
 </html>
+
+<script>
+document.getElementById("download").addEventListener("click", function () {
+    const link = document.getElementById("hidden-download");
+    link.click(); // activa descarga del zip
+});
+</script>
