@@ -68,18 +68,22 @@ ActionManager.prototype.has = function(action) {
 }
 
 ActionManager.prototype.lock = function(action, until) {
-
-  /*
-   * Function ActionManager.lock
-   * Locks an action from the action set by removing it and adding it back after a certain amount of time has passed
-   */
-
+  // Quitar el action del set
   this.__actions.delete(action);
 
-  // Add to the game queue and save a reference to the event in case it must be canceled
-  return process.gameServer.world.eventQueue.addEvent(this.__unlock.bind(this, action), until);
+  // Normalizar el tiempo
+  if (!Number.isFinite(until) || until <= 0) {
+    console.warn("ActionManager.lock: 'until' inválido, usando 1. Got:", until, "action:", action && action.type);
+    until = 1;
+  }
 
+  // Programar el desbloqueo
+  return process.gameServer.world.eventQueue.addEvent(
+    this.__unlock.bind(this, action),
+    until
+  );
 }
+
 
 ActionManager.prototype.add = function(action) {
 

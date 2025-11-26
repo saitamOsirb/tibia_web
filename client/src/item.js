@@ -1,4 +1,4 @@
-const Item = function(id, count) {
+const Item = function (id, count) {
 
   /*
    * Class Item
@@ -24,7 +24,7 @@ const Item = function(id, count) {
 Item.prototype = Object.create(Thing.prototype);
 Item.prototype.constructor = Item;
 
-Item.prototype.getPattern = function() {
+Item.prototype.getPattern = function () {
 
   /*
    * Function Item.getPattern
@@ -34,22 +34,35 @@ Item.prototype.getPattern = function() {
   // Things have no frame group
   let frameGroup = this.getFrameGroup(FrameGroup.prototype.NONE);
 
-  // If hangable get the hanging pattern instead
-  if(this.isHangable()) {
+  // 👇 FORZAR patrón hangable en las mesas bugueadas
+  // this.id aquí es el ID interno del cliente (el que viste como 1622 en el log)
+  // DEBUG: mirar frame group de la mesa
+  /*if (this.id === 2322 ) {
+    console.log("DEBUG 2322 frameGroup:", frameGroup);
+    if (frameGroup && frameGroup.pattern) {
+      console.log("patternX:", frameGroup.pattern.x,
+        "patternY:", frameGroup.pattern.y,
+        "layers:", frameGroup.layers,
+        "frames:", frameGroup.frames);
+    }
+  }*/
+
+  // Si es hangable de verdad, usar patrón colgado
+  if (this.isHangable()) {
     return this.__getHangablePattern();
   }
 
-  // If stackable get the stackable pattern instead
-  if(this.isStackable() && frameGroup.pattern.x == 4 && frameGroup.pattern.y == 2) {
+  // Si es stackable, patrón de cantidad
+  if (this.isStackable() && frameGroup.pattern.x == 4 && frameGroup.pattern.y == 2) {
     return this.__getCountPattern();
   }
 
-  // No pattern
+  // Sin patrón especial
   return Position.prototype.NULL;
 
 }
 
-Item.prototype.getCount = function() {
+Item.prototype.getCount = function () {
 
   /*
    * Function Item.getCount
@@ -60,7 +73,7 @@ Item.prototype.getCount = function() {
 
 }
 
-Item.prototype.isHookSouth = function() {
+Item.prototype.isHookSouth = function () {
 
   /*
    * Function Item.isHookSouth
@@ -71,7 +84,7 @@ Item.prototype.isHookSouth = function() {
 
 }
 
-Item.prototype.isHookEast = function() {
+Item.prototype.isHookEast = function () {
 
   /*
    * Function Item.isHookEast
@@ -82,18 +95,21 @@ Item.prototype.isHookEast = function() {
 
 }
 
-Item.prototype.isHangable = function() {
+Item.prototype.isHangable = function () {
 
   /*
    * Function Item.isHangable
    * Returns true if the item can be used with something else
    */
-
+  if (this.id === 2322/* o 1623, según qué ID guarda el cliente */) {
+    console.log("pase por el if con id " + this.id);
+    return true;
+  }
   return this.hasFlag(PropBitFlag.prototype.flags.DatFlagHangable);
 
 }
 
-Item.prototype.isPickupable = function() {
+Item.prototype.isPickupable = function () {
 
   /*
    * Function Item.isPickupable
@@ -104,7 +120,7 @@ Item.prototype.isPickupable = function() {
 
 }
 
-Item.prototype.isElevation = function() {
+Item.prototype.isElevation = function () {
 
   /*
    * Function Item.isWalkable
@@ -115,7 +131,7 @@ Item.prototype.isElevation = function() {
 
 }
 
-Item.prototype.isWalkable = function() {
+Item.prototype.isWalkable = function () {
 
   /*
    * Function Item.isWalkable
@@ -126,7 +142,7 @@ Item.prototype.isWalkable = function() {
 
 }
 
-Item.prototype.isMoveable = function() {
+Item.prototype.isMoveable = function () {
 
   /*
    * Function Item.isMoveable
@@ -137,7 +153,7 @@ Item.prototype.isMoveable = function() {
 
 }
 
-Item.prototype.isStackable = function() {
+Item.prototype.isStackable = function () {
 
   /*
    * Function Item.isStackable
@@ -148,7 +164,7 @@ Item.prototype.isStackable = function() {
 
 }
 
-Item.prototype.__getHangablePattern = function() {
+Item.prototype.__getHangablePattern = function () {
 
   /*
    * Function Item.__getHangablePattern
@@ -156,11 +172,11 @@ Item.prototype.__getHangablePattern = function() {
    */
 
   // If the thing has a parent that is a tile
-  if(this.__parent instanceof Tile) {
-    
-    if(this.__parent.isHookSouth()) {
+  if (this.__parent instanceof Tile) {
+
+    if (this.__parent.isHookSouth()) {
       return new Position(1, 0, 0);
-    } else if(this.__parent.isHookEast()) {
+    } else if (this.__parent.isHookEast()) {
       return new Position(2, 0, 0);
     }
 
@@ -171,7 +187,7 @@ Item.prototype.__getHangablePattern = function() {
 
 }
 
-Item.prototype.__getCountPattern = function() {
+Item.prototype.__getCountPattern = function () {
 
   /*
    * Function Item.__getCountPattern
@@ -181,21 +197,21 @@ Item.prototype.__getCountPattern = function() {
   let count = this.getCount();
 
   // These are hardcoded patterns
-  if(count === 1) {
+  if (count === 1) {
     return Position.prototype.NULL;
-  } else if(count === 2) {
+  } else if (count === 2) {
     return new Position(1, 0, 0);
-  } else if(count === 3) {
+  } else if (count === 3) {
     return new Position(2, 0, 0);
-  } else if(count === 4) {
+  } else if (count === 4) {
     return new Position(3, 0, 0);
-  } else if(count === 5) {
+  } else if (count === 5) {
     return new Position(4, 0, 0);
-  } else if(count < 10) {
+  } else if (count < 10) {
     return new Position(0, 1, 0);
-  } else if(count < 25) {
+  } else if (count < 25) {
     return new Position(1, 1, 0);
-  } else if(count < 50) {
+  } else if (count < 50) {
     return new Position(2, 1, 0);
   } else {
     return new Position(3, 1, 0);

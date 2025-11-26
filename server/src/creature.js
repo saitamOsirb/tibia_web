@@ -10,7 +10,7 @@ const PacketWriter = require("./packet-writer");
 const PacketReader = require("./packet-reader");
 const Position = require("./position");
 
-const Creature = function(data) {
+const Creature = function (data) {
 
   /*
    * Class Creature
@@ -69,15 +69,15 @@ Creature.prototype.TYPE = new Object({
   "NPC": 0x02
 });
 
-Creature.prototype.sendCancelMessage = function() {
+Creature.prototype.sendCancelMessage = function () {
 
   return;
 
 }
 
-Creature.prototype.getFacePosition = function() {
+Creature.prototype.getFacePosition = function () {
 
-  switch(this.direction) {
+  switch (this.direction) {
     case Position.prototype.NORTH: return this.position.north();
     case Position.prototype.EAST: return this.position.east();
     case Position.prototype.SOUTH: return this.position.south();
@@ -86,20 +86,23 @@ Creature.prototype.getFacePosition = function() {
 
 }
 
-Creature.prototype.getSpeed = function() {
+Creature.prototype.getSpeed = function () {
 
   return this.speed;
 
 }
 
-Creature.prototype.getStepDuration = function(friction) {
+Creature.prototype.getStepDuration = function (friction) {
 
   /*
    * Function Creature.getStepDuration
    * Math to calcualte the amount of frames to lock when walking (50MS tick)
    * See: https://tibia.fandom.com/wiki/Speed_Breakpoints
    */
-
+  console.log("friction:",friction);
+  if (friction == null) {
+    friction = 100;
+  }
   const A = 857.36;
   const B = 261.29;
   const C = -4795.009;
@@ -111,13 +114,13 @@ Creature.prototype.getStepDuration = function(friction) {
 
 }
 
-Creature.prototype.isDrunk = function(id) {
+Creature.prototype.isDrunk = function (id) {
 
   return this.hasCondition(Condition.prototype.DRUNK) && !this.hasCondition(Condition.prototype.SUPPRESS_DRUNK);
 
 }
 
-Creature.prototype.hasCondition = function(id) {
+Creature.prototype.hasCondition = function (id) {
 
   /*
    * Function Creature.hasCondition
@@ -128,7 +131,7 @@ Creature.prototype.hasCondition = function(id) {
 
 }
 
-Creature.prototype.removeCondition = function(id) {
+Creature.prototype.removeCondition = function (id) {
 
   /*
    * Function Creature.addCondition
@@ -139,7 +142,7 @@ Creature.prototype.removeCondition = function(id) {
 
 }
 
-Creature.prototype.addCondition = function(id, ticks, duration, properties) {
+Creature.prototype.addCondition = function (id, ticks, duration, properties) {
 
   /*
    * Function Creature.addCondition
@@ -149,7 +152,7 @@ Creature.prototype.addCondition = function(id, ticks, duration, properties) {
   let condition = new Condition(id, ticks, duration);
 
   // The condition is already applied: remove it first
-  if(this.hasCondition(condition.id)) {
+  if (this.hasCondition(condition.id)) {
     return this.conditions.replace(condition, properties);
   }
 
@@ -160,7 +163,7 @@ Creature.prototype.addCondition = function(id, ticks, duration, properties) {
 
 }
 
-Creature.prototype.sayEmote = function(emote, color) {
+Creature.prototype.sayEmote = function (emote, color) {
 
   /*
    * Function Creature.sayEmote
@@ -171,7 +174,7 @@ Creature.prototype.sayEmote = function(emote, color) {
 
 }
 
-Creature.prototype.handleOpenDoor = function(thing) {
+Creature.prototype.handleOpenDoor = function (thing) {
 
   /*
    * Function Creature.handleOpenDoor
@@ -179,25 +182,25 @@ Creature.prototype.handleOpenDoor = function(thing) {
    */
 
   // There is no thing or the thing is not a door
-  if(thing === null || !thing.isDoor()) {
+  if (thing === null || !thing.isDoor()) {
     return;
   }
 
   // If the door is closed then just open it
-  if(!thing.isOpened() && !thing.isLocked()) {
+  if (!thing.isOpened() && !thing.isLocked()) {
     return thing.open();
   }
 
 }
 
-Creature.prototype.getFluidType = function() {
+Creature.prototype.getFluidType = function () {
 
   /*
    * Function Creature.getFluidType
    * Returns the fluid type of a creature
    */
 
-  switch(this.getPrototype().fluidType) {
+  switch (this.getPrototype().fluidType) {
     case CONST.BLOODTYPE.BLOOD: return FluidContainer.prototype.FLUID_TYPES.BLOOD;
     case CONST.BLOODTYPE.POISON: return FluidContainer.prototype.FLUID_TYPES.SLIME;
     default: return FluidContainer.prototype.FLUID_TYPES.BLOOD;
@@ -205,7 +208,7 @@ Creature.prototype.getFluidType = function() {
 
 }
 
-Creature.prototype.getChunk = function() {
+Creature.prototype.getChunk = function () {
 
   /*
    * Function Creature.getChunk
@@ -216,14 +219,14 @@ Creature.prototype.getChunk = function() {
 
 }
 
-Creature.prototype.getAdjacentChunks = function() {
+Creature.prototype.getAdjacentChunks = function () {
 
   /*
    * Function Creature.getAdjacentChunks
    * Returns all neighbouring sectors (including self)
    */
 
-  if(this.__chunk === null) {
+  if (this.__chunk === null) {
     return new Array();
   }
 
@@ -231,7 +234,7 @@ Creature.prototype.getAdjacentChunks = function() {
 
 }
 
-Creature.prototype.getHealthFraction = function() {
+Creature.prototype.getHealthFraction = function () {
 
   /*
    * Function Creature.getHealthFraction
@@ -242,7 +245,7 @@ Creature.prototype.getHealthFraction = function() {
 
 }
 
-Creature.prototype.getTarget = function() {
+Creature.prototype.getTarget = function () {
 
   /*
    * Function Creature.getTarget
@@ -253,7 +256,7 @@ Creature.prototype.getTarget = function() {
 
 }
 
-Creature.prototype.changeOutfit = function(outfit) {
+Creature.prototype.changeOutfit = function (outfit) {
 
   /*
    * Function Creature.changeOutfit
@@ -261,7 +264,7 @@ Creature.prototype.changeOutfit = function(outfit) {
    */
 
   // Check whether the outfit is in fact valid
-  if(!outfit.isValid()) {
+  if (!outfit.isValid()) {
     return;
   }
 
@@ -273,7 +276,7 @@ Creature.prototype.changeOutfit = function(outfit) {
 
 }
 
-Creature.prototype.calculateDefense = function() {
+Creature.prototype.calculateDefense = function () {
 
   /*
    * Creature.calculateDefense
@@ -285,7 +288,7 @@ Creature.prototype.calculateDefense = function() {
 
 }
 
-Creature.prototype.calculateDamage = function() {
+Creature.prototype.calculateDamage = function () {
 
   /*
    * Creature.calculateDamage
@@ -297,7 +300,7 @@ Creature.prototype.calculateDamage = function() {
 
 }
 
-Creature.prototype.getPosition = function() {
+Creature.prototype.getPosition = function () {
 
   /*
    * Function Creature.getPosition
@@ -308,7 +311,7 @@ Creature.prototype.getPosition = function() {
 
 }
 
-Creature.prototype.getDefense = function() {
+Creature.prototype.getDefense = function () {
 
   /*
    * Function Creature.getDefense
@@ -319,7 +322,7 @@ Creature.prototype.getDefense = function() {
 
 }
 
-Creature.prototype.getAttack = function() {
+Creature.prototype.getAttack = function () {
 
   /*
    * Function Creature.getAttack
@@ -330,7 +333,7 @@ Creature.prototype.getAttack = function() {
 
 }
 
-Creature.prototype.lockAction = function(action, duration) {
+Creature.prototype.lockAction = function (action, duration) {
 
   /*
    * Function Creature.lockAction
@@ -341,7 +344,7 @@ Creature.prototype.lockAction = function(action, duration) {
 
 }
 
-Creature.prototype.leaveOldChunk = function(oldChunks) {
+Creature.prototype.leaveOldChunk = function (oldChunks) {
 
   /*
    * Function Creature.leaveOldChunk
@@ -353,7 +356,7 @@ Creature.prototype.leaveOldChunk = function(oldChunks) {
 
 }
 
-Creature.prototype.enterNewChunk = function(newChunks) {
+Creature.prototype.enterNewChunk = function (newChunks) {
 
   /*
    * Function Creature.enterNewChunk
@@ -365,7 +368,7 @@ Creature.prototype.enterNewChunk = function(newChunks) {
 
 }
 
-Creature.prototype.canSee = function(position) {
+Creature.prototype.canSee = function (position) {
 
   /*
    * Function Creature.prototype.canSee
@@ -373,10 +376,10 @@ Creature.prototype.canSee = function(position) {
    */
 
   return Math.abs(this.position.x - position.x) < 8 &&
-         Math.abs(this.position.y - position.y) < 6;
+    Math.abs(this.position.y - position.y) < 6;
 }
 
-Creature.prototype.setHealth = function(health) {
+Creature.prototype.setHealth = function (health) {
 
   /*
    * Function Creature.setHealth
@@ -391,7 +394,7 @@ Creature.prototype.setHealth = function(health) {
 
 }
 
-Creature.prototype.setChunk = function(chunk) {
+Creature.prototype.setChunk = function (chunk) {
 
   /*
    * Function Creature.setChunk
@@ -402,7 +405,7 @@ Creature.prototype.setChunk = function(chunk) {
 
 }
 
-Creature.prototype.setPosition = function(position) {
+Creature.prototype.setPosition = function (position) {
 
   /*
    * Function Creature.setPosition
@@ -413,7 +416,7 @@ Creature.prototype.setPosition = function(position) {
 
 }
 
-Creature.prototype.setDirection = function(direction) {
+Creature.prototype.setDirection = function (direction) {
 
   /*
    * Function Creature.setDirection
@@ -428,7 +431,7 @@ Creature.prototype.setDirection = function(direction) {
 
 }
 
-Creature.prototype.deintroduce = function() {
+Creature.prototype.deintroduce = function () {
 
   /*
    * Function Creature.deintroduce
@@ -439,7 +442,7 @@ Creature.prototype.deintroduce = function() {
 
 }
 
-Creature.prototype.info = function() {
+Creature.prototype.info = function () {
 
   /*
    * Function Creature.info
@@ -450,7 +453,7 @@ Creature.prototype.info = function() {
 
 }
 
-Creature.prototype.internalCreatureYell = function(message, color) {
+Creature.prototype.internalCreatureYell = function (message, color) {
 
   /*
    * Function Creature.internalCreatureYell
@@ -461,7 +464,7 @@ Creature.prototype.internalCreatureYell = function(message, color) {
 
 }
 
-Creature.prototype.internalCreatureWhisper = function(message, color) {
+Creature.prototype.internalCreatureWhisper = function (message, color) {
 
   /*
    * Function Creature.internalCreatureWhisper
@@ -476,7 +479,7 @@ Creature.prototype.internalCreatureWhisper = function(message, color) {
 
 }
 
-Creature.prototype.internalCreatureSay = function(message, color) {
+Creature.prototype.internalCreatureSay = function (message, color) {
 
   /*
    * Function Creature.internalCreatureSay
@@ -506,7 +509,7 @@ Creature.prototype.internalCreatureSay = function(message, color) {
 
 }*/
 
-Creature.prototype.privateSay = function(player, message, color) {
+Creature.prototype.privateSay = function (player, message, color) {
 
   /*
    * Function Creature.privateSay
@@ -517,7 +520,7 @@ Creature.prototype.privateSay = function(player, message, color) {
 
 }
 
-Creature.prototype.hasTarget = function() {
+Creature.prototype.hasTarget = function () {
 
   /*
    * Function Creature.hasTarget
@@ -528,7 +531,7 @@ Creature.prototype.hasTarget = function() {
 
 }
 
-Creature.prototype.isWithinRangeOf = function(creature, range) {
+Creature.prototype.isWithinRangeOf = function (creature, range) {
 
   /*
    * Function Creature.isWithinRangeOf
@@ -539,7 +542,7 @@ Creature.prototype.isWithinRangeOf = function(creature, range) {
 
 }
 
-Creature.prototype.is = function(name) {
+Creature.prototype.is = function (name) {
 
   /*
    * Function Creature.is
@@ -550,7 +553,7 @@ Creature.prototype.is = function(name) {
 
 }
 
-Creature.prototype.isWithinChunk = function(chunk) {
+Creature.prototype.isWithinChunk = function (chunk) {
 
   /*
    * Function Creature.isWithinChunk
@@ -561,7 +564,7 @@ Creature.prototype.isWithinChunk = function(chunk) {
 
 }
 
-Creature.prototype.isMoving = function() {
+Creature.prototype.isMoving = function () {
 
   /*
    * Function Creature.isMoving
@@ -572,7 +575,7 @@ Creature.prototype.isMoving = function() {
 
 }
 
-Creature.prototype.isBesidesTarget = function() {
+Creature.prototype.isBesidesTarget = function () {
 
   /*
    * Function Creature.isBesidesTarget
@@ -580,7 +583,7 @@ Creature.prototype.isBesidesTarget = function() {
    */
 
   // No target
-  if(this.__target === null) {
+  if (this.__target === null) {
     return false;
   }
 
@@ -588,7 +591,7 @@ Creature.prototype.isBesidesTarget = function() {
 
 }
 
-Creature.prototype.isBesidesThing = function(thing) {
+Creature.prototype.isBesidesThing = function (thing) {
 
   /*
    * Function Creature.isBesidesThing
@@ -599,7 +602,7 @@ Creature.prototype.isBesidesThing = function(thing) {
 
 }
 
-Creature.prototype.isMounted = function() {
+Creature.prototype.isMounted = function () {
 
   /*
    * Function Creature.isMounted
@@ -610,7 +613,7 @@ Creature.prototype.isMounted = function() {
 
 }
 
-Creature.prototype.isZeroHealth = function() {
+Creature.prototype.isZeroHealth = function () {
 
   /*
    * Function Creature.isZeroHealth
@@ -621,7 +624,7 @@ Creature.prototype.isZeroHealth = function() {
 
 }
 
-Creature.prototype.isPlayer = function() {
+Creature.prototype.isPlayer = function () {
 
   /*
    * Function Creature.isPlayer
@@ -632,7 +635,7 @@ Creature.prototype.isPlayer = function() {
 
 }
 
-Creature.prototype.isFullHealth = function() {
+Creature.prototype.isFullHealth = function () {
 
   /*
    * Function Creature.isFullHealth
@@ -643,13 +646,13 @@ Creature.prototype.isFullHealth = function() {
 
 }
 
-Creature.prototype.setFullHealth = function() {
+Creature.prototype.setFullHealth = function () {
 
   this.increaseHealth(this.maxHealth - this.health);
 
 }
 
-Creature.prototype.increaseHealth = function(amount) {
+Creature.prototype.increaseHealth = function (amount) {
 
   /*
    * Function Creature.increaseHealth
@@ -664,7 +667,7 @@ Creature.prototype.increaseHealth = function(amount) {
 
 }
 
-Creature.prototype.internalDecreaseHealth = function(attacker, amount, color) {
+Creature.prototype.internalDecreaseHealth = function (attacker, amount, color) {
 
   /*
    * Function Creature.internalDecreaseHealth
@@ -679,7 +682,7 @@ Creature.prototype.internalDecreaseHealth = function(attacker, amount, color) {
 
 }
 
-Creature.prototype.broadcast = function(packet) {
+Creature.prototype.broadcast = function (packet) {
 
   /*
    * Function Creature.broadcast
@@ -687,7 +690,7 @@ Creature.prototype.broadcast = function(packet) {
    */
 
   // Not in the gameworld: ignore this call
-  if(this.__chunk === null) {
+  if (this.__chunk === null) {
     return;
   }
 
@@ -696,14 +699,14 @@ Creature.prototype.broadcast = function(packet) {
 
 }
 
-Creature.prototype.broadcastFloor = function(packet) {
+Creature.prototype.broadcastFloor = function (packet) {
 
   /*
    * Function Creature.broadcastFloor
    * Broadcasts a packet to all spectators on the same floor as the creature
    */
 
-  if(this.position === null) {
+  if (this.position === null) {
     return;
   }
 
@@ -712,14 +715,14 @@ Creature.prototype.broadcastFloor = function(packet) {
 
 }
 
-Creature.prototype.isInLineOfSight = function(other) {
+Creature.prototype.isInLineOfSight = function (other) {
 
   /*
    * Function Creature.isInLineOfSight
    * Returns true if the creature can see another thing at a position
    */
 
-  if(this.position === null) {
+  if (this.position === null) {
     return false;
   }
 
@@ -727,7 +730,7 @@ Creature.prototype.isInLineOfSight = function(other) {
 
 }
 
-Creature.prototype.think = function() {
+Creature.prototype.think = function () {
 
   /*
    * Function Creature.think
@@ -739,7 +742,7 @@ Creature.prototype.think = function() {
 
 }
 
-Creature.prototype.wander = function() {
+Creature.prototype.wander = function () {
 
   /*
    * Function Creature.wander
@@ -755,11 +758,11 @@ Creature.prototype.wander = function() {
   );
 
   // Try them all
-  while(options.length > 0) {
+  while (options.length > 0) {
 
     let tile = process.gameServer.world.getTileFromWorldPosition(options.popRandom());
 
-    if(tile !== null && tile.id !== 0 && !this.isTileOccupied(tile)) {
+    if (tile !== null && tile.id !== 0 && !this.isTileOccupied(tile)) {
       return tile;
     }
 
@@ -769,14 +772,14 @@ Creature.prototype.wander = function() {
 
 }
 
-Creature.prototype.getPathToTarget = function() {
+Creature.prototype.getPathToTarget = function () {
 
   /*
    * Public Function Creature.__getPathToTarget
    * Call to the pathfinder to recover the next step to be set by the creature
    */
 
-  if(this.position === null) {
+  if (this.position === null) {
     return null;
   }
 
@@ -789,7 +792,7 @@ Creature.prototype.getPathToTarget = function() {
   );
 
   // If no path is found the creature should instead wander randomly
-  if(path.length === 0) {
+  if (path.length === 0) {
     return null;
   }
 
@@ -798,7 +801,7 @@ Creature.prototype.getPathToTarget = function() {
 
 }
 
-Creature.prototype.__setOutfit = function(outfit) {
+Creature.prototype.__setOutfit = function (outfit) {
 
   /*
    * Public Function Creature.__setOutfit
@@ -809,7 +812,7 @@ Creature.prototype.__setOutfit = function(outfit) {
 
 }
 
-Creature.prototype.__registerEvents = function(events) {
+Creature.prototype.__registerEvents = function (events) {
 
   /*
    * Function Creature.__registerEvents
@@ -817,19 +820,19 @@ Creature.prototype.__registerEvents = function(events) {
    */
 
   // Not specified
-  if(events === undefined) {
+  if (events === undefined) {
     return;
   }
 
   // Bind the events
-  events.forEach(function(event) {
+  events.forEach(function (event) {
     this.on(event.on, event.callback.bind(this));
   }, this);
 
 }
 
 
-Creature.prototype.__getSpellPosition = function(x, y) {
+Creature.prototype.__getSpellPosition = function (x, y) {
 
   /*
    * Function World.__getSpellPosition
@@ -840,7 +843,7 @@ Creature.prototype.__getSpellPosition = function(x, y) {
 
 }
 
-Creature.prototype.__rotate2DPosition = function(direction, x, y) {
+Creature.prototype.__rotate2DPosition = function (direction, x, y) {
 
   /*
    * Function World.__rotate2DPosition
@@ -848,7 +851,7 @@ Creature.prototype.__rotate2DPosition = function(direction, x, y) {
    */
 
   // 2D rotation around 90 degrees
-  switch(this.direction) {
+  switch (this.direction) {
     case Position.prototype.NORTH: return new Position(+x, +y, 0);
     case Position.prototype.EAST: return new Position(-y, -x, 0);
     case Position.prototype.SOUTH: return new Position(+x, -y, 0);

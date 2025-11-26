@@ -234,11 +234,13 @@ PacketWriter.prototype.writeItemInformation = function(player, tile, item) {
    */
 
   // Server and client identifier
+
+  console.log(item.position);
   this.writeUInt16(item.id);
   this.writeClientId(item.id);
 
   let includeDetails = !item.hasUniqueId() && (tile.constructor.name !== "Tile" || player.isBesidesThing(tile));
- 
+  
   // Weight
   if(includeDetails) {
     this.writeUInt16(item.getWeight());

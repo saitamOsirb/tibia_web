@@ -46,15 +46,15 @@
   ],
   "characterStatistics": {
     "position": {
-        "x": 73,
-      "y": 63,
+      "x": 32096,
+      "y": 32213,
       "z": 8
     },
     "admin": false,
     "sex": null,
     "templePosition": {
-      "x": 73,
-      "y": 63,
+      "x": 32096,
+      "y": 32213,
       "z": 8
     },
     "maxCapacity": 20000,

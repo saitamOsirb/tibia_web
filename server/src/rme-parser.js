@@ -4,7 +4,7 @@ const Position = require("./position");
 const World = require("./world");
 const otbm2json = require("../lib/otbm2json.js");
 
-const RMEParser = function(database) {
+const RMEParser = function (database) {
 
   /*
    * Class RMEParser
@@ -16,7 +16,7 @@ const RMEParser = function(database) {
 
 }
 
-RMEParser.prototype.load = function() {
+RMEParser.prototype.load = function () {
 
   /*
    * Function RMEParser.load
@@ -25,8 +25,10 @@ RMEParser.prototype.load = function() {
 
   // Define the map size (always 2048x2048x16)
   let size = new Position(
-    CONFIG.WORLD.CHUNK.WIDTH * Math.ceil(2048 / CONFIG.WORLD.CHUNK.WIDTH),
-    CONFIG.WORLD.CHUNK.HEIGHT * Math.ceil(2048 / CONFIG.WORLD.CHUNK.HEIGHT),
+    //CONFIG.WORLD.CHUNK.WIDTH * Math.ceil(2048 / CONFIG.WORLD.CHUNK.WIDTH),
+    //CONFIG.WORLD.CHUNK.HEIGHT * Math.ceil(2048 / CONFIG.WORLD.CHUNK.HEIGHT),
+    CONFIG.WORLD.CHUNK.WIDTH * Math.ceil(12000/ CONFIG.WORLD.CHUNK.WIDTH),
+    CONFIG.WORLD.CHUNK.HEIGHT * Math.ceil(12000 / CONFIG.WORLD.CHUNK.HEIGHT),
     16
   );
 
@@ -36,7 +38,7 @@ RMEParser.prototype.load = function() {
   let world = process.gameServer.world = new World(size);
 
   // Add all the zones
-  Object.entries(this.database.zones).forEach(function([ key, value ]) {
+  Object.entries(this.database.zones).forEach(function ([key, value]) {
     this.__loadOTBMFile(world, value.file, key);
   }, this);
 
@@ -49,7 +51,7 @@ RMEParser.prototype.load = function() {
 
 }
 
-RMEParser.prototype.__parseRMEItem = function(item) {
+RMEParser.prototype.__parseRMEItem = function (item) {
 
   /*
    * Function RMEParser.__parseRMEItem
@@ -59,61 +61,69 @@ RMEParser.prototype.__parseRMEItem = function(item) {
   // Create a wrapper for easy lookup
   let thing = this.database.createThing(item.id);
 
+  // Si no existe el prototipo para este item, lo saltamos
+  if (!thing) {
+    console.warn(`RMEParser.__parseRMEItem: item id ${item.id} no existe en la base de datos, se omite del mapa.`);
+    return null;
+  }
+
   // The item has text
-  if(item.text) {
+  if (item.text) {
     thing.setContent(item.text);
   }
 
   // The item has a count
-  if(item.count) {
+  if (item.count) {
     thing.setCount(item.count);
   }
 
   // The item (e.g., teleporter) has a destination
-  if(item.destination) {
+  if (item.destination) {
     thing.setDestination(item.destination);
   }
 
   // The object has an action identifier
-  if(item.aid) {
+  if (item.aid) {
     thing.setActionId(item.aid);
   }
 
-  if(item.uid) {
+  if (item.uid) {
     thing.setUniqueId(item.uid);
   }
 
-  if(item.content) {
+  if (item.content) {
     this.__parseItems(thing, item.content);
   }
 
-  if(thing.isDecaying()) {
+  if (thing.isDecaying()) {
     thing.scheduleDecay();
   }
-
 
   return thing;
 
 }
 
-RMEParser.prototype.__parseItems = function(container, things) {
+RMEParser.prototype.__parseItems = function (container, things) {
 
   /*
    * Function RMEParser.__parseItems
-   * Parses item definitions from JSON
    */
 
-  things.forEach(function(thing, index) {
+  things.forEach(function (thing, index) {
 
-    if(thing !== null) {
-      return container.addThing(this.__parseRMEItem(thing), index);
+    if (thing !== null) {
+      const parsed = this.__parseRMEItem(thing);
+      if (parsed) {
+        return container.addThing(parsed, index);
+      }
+      // si parsed es null, lo ignoramos silenciosamente
     }
-    
+
   }, this);
 
 }
 
-RMEParser.prototype.__RMEVersion = function(version) {
+RMEParser.prototype.__RMEVersion = function (version) {
 
   /*
    * Function RMEParser.__RMEVersion
@@ -122,7 +132,7 @@ RMEParser.prototype.__RMEVersion = function(version) {
    */
 
   // Implement other versions here mapping version string -> minor, major item version
-  switch(version) {
+  switch (version) {
     case "740":
     case "750":
       return [1, 1];
@@ -147,7 +157,7 @@ RMEParser.prototype.__RMEVersion = function(version) {
 
 }
 
-RMEParser.prototype.__readOTBMFile = function(file) {
+RMEParser.prototype.__readOTBMFile = function (file) {
 
   /*
    * Function RMEParser.__readOTBMFile
@@ -158,7 +168,7 @@ RMEParser.prototype.__readOTBMFile = function(file) {
 
 }
 
-RMEParser.prototype.__addHouseTile = function(hid, tile) {
+RMEParser.prototype.__addHouseTile = function (hid, tile) {
 
   /*
    * Function RMEParser.__loadOTBMFile
@@ -169,13 +179,13 @@ RMEParser.prototype.__addHouseTile = function(hid, tile) {
   let house = this.database.getHouse(hid);
 
   // Add the tile to this particular house
-  if(house !== null) {
+  if (house !== null) {
     return house.addTile(tile);
   }
 
 }
 
-RMEParser.prototype.__loadOTBMFile = function(world, file, zid) {
+RMEParser.prototype.__loadOTBMFile = function (world, file, zid) {
 
   /*
    * Function RMEParser.__loadOTBMFile
@@ -188,33 +198,33 @@ RMEParser.prototype.__loadOTBMFile = function(world, file, zid) {
   let mapData = this.__readOTBMFile(file);
 
   // Determine the RME versions from the client versions
-  let [ major, minor ] = this.__RMEVersion(CONFIG.SERVER.CLIENT_VERSION);
-  
+  let [major, minor] = this.__RMEVersion(CONFIG.SERVER.CLIENT_VERSION);
+
   // Make sure the map is OK with the version
-  if(major !== mapData.data.itemsMajorVersion || minor !== mapData.data.itemsMinorVersion) {
-    throw("Map version does not match the specified server version.");
+  if (major !== mapData.data.itemsMajorVersion || minor !== mapData.data.itemsMinorVersion) {
+    throw ("Map version does not match the specified server version.");
   }
 
   // Go over the OTBM map data
-  mapData.data.nodes.forEach(function(node) {
+  mapData.data.nodes.forEach(function (node) {
 
-    node.features.forEach(function(feature) {
+    node.features.forEach(function (feature) {
 
       // Only tile areas contain information on tiles
-      if(feature.type !== otbm2json.HEADERS.OTBM_TILE_AREA) {
-        return; 
+      if (feature.type !== otbm2json.HEADERS.OTBM_TILE_AREA) {
+        return;
       }
 
       // There are no tiles in this area
-      if(!feature.tiles) {
-        return; 
+      if (!feature.tiles) {
+        return;
       }
- 
-      // Go over each tile
-      feature.tiles.forEach(function(tile) {
 
-        if(tile.type !== otbm2json.HEADERS.OTBM_TILE && tile.type !== otbm2json.HEADERS.OTBM_HOUSETILE) {
-           return; 
+      // Go over each tile
+      feature.tiles.forEach(function (tile) {
+
+        if (tile.type !== otbm2json.HEADERS.OTBM_TILE && tile.type !== otbm2json.HEADERS.OTBM_HOUSETILE) {
+          return;
         }
 
         // Add the tile position to the area position (swap the z-coordinate: this is better)
@@ -228,12 +238,12 @@ RMEParser.prototype.__loadOTBMFile = function(world, file, zid) {
         let chunk = world.lattice.getChunkFromWorldPosition(worldPosition);
 
         // Creates the chunk
-        if(chunk === null) {
+        if (chunk === null) {
           chunk = world.lattice.createChunk(worldPosition);
         }
 
         // Somehow tiles with actions have become items..
-        if(!tile.tileid && tile.items && (tile.items[0].aid || tile.items[0].uid)) {
+        if (!tile.tileid && tile.items && (tile.items[0].aid || tile.items[0].uid)) {
 
           tile = new Object({
             "tileid": tile.items[0].id,
@@ -250,30 +260,33 @@ RMEParser.prototype.__loadOTBMFile = function(world, file, zid) {
         worldTile.zoneIdentifier = zid;
 
         // Set the action identifier
-        if(tile.aid) {
+        if (tile.aid) {
           worldTile.setActionId(tile.aid);
         }
 
         // Set the action identifier
-        if(tile.uid) {
+        if (tile.uid) {
           worldTile.setUniqueId(tile.uid);
         }
 
         // Set the tile zone flags
-        if(tile.zones) {
+        if (tile.zones) {
           worldTile.setZoneFlags(tile.zones);
         }
 
         // Add the items to the tile
-        if(tile.items) {
+        if (tile.items) {
 
-          tile.items.forEach(function(item) {
-            worldTile.addTopThing(this.__parseRMEItem(item));
+          tile.items.forEach(function (item) {
+            const thing = this.__parseRMEItem(item);
+            if (thing) {
+              worldTile.addTopThing(thing);
+            }
           }, this);
 
         }
 
-        if(tile.type === otbm2json.HEADERS.OTBM_HOUSETILE) {
+        if (tile.type === otbm2json.HEADERS.OTBM_HOUSETILE) {
           this.__addHouseTile(tile.houseId, worldTile);
         }
 

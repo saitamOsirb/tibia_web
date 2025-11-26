@@ -19,7 +19,7 @@ const RMEParser = require("./rme-parser");
 // Standard lib
 const fs = require("fs");
 
-const Database = function() {
+const Database = function () {
 
   /*
    * Class Database
@@ -42,15 +42,15 @@ const Database = function() {
 
 }
 
-Database.prototype.loadHouseItems = function() {
+Database.prototype.loadHouseItems = function () {
 
-  this.houses.forEach(function(house) {
+  this.houses.forEach(function (house) {
 
     let json = JSON.parse(fs.readFileSync(
       getDataFile("houses", "definitions", "%s.json".format(house.id))
     ));
 
-    json.forEach(function(entry) {
+    json.forEach(function (entry) {
 
       // Crear el item
       let thing = process.gameServer.database.parseThing(entry.item);
@@ -69,7 +69,7 @@ Database.prototype.loadHouseItems = function() {
   });
 }
 
-Database.prototype.saveHouses = function() {
+Database.prototype.saveHouses = function () {
 
   /*
    * Function Database.saveHouses
@@ -77,17 +77,17 @@ Database.prototype.saveHouses = function() {
    */
 
   // Go over everything
-  this.houses.forEach(function(house) {
+  this.houses.forEach(function (house) {
 
     // Collect all things for serialization
     let things = new Array();
 
-    house.tiles.forEach(function(tile) {
+    house.tiles.forEach(function (tile) {
 
-      tile.itemStack.__items.forEach(function(item) {
+      tile.itemStack.__items.forEach(function (item) {
 
         // Save everything that can be moved or picked up
-        if(!item.isPickupable() && !item.isMoveable()) {
+        if (!item.isPickupable() && !item.isMoveable()) {
           return;
         }
 
@@ -111,7 +111,7 @@ Database.prototype.saveHouses = function() {
 
 }
 
-Database.prototype.initialize = function() {
+Database.prototype.initialize = function () {
 
   /*
    * Function Database.initialize
@@ -147,30 +147,30 @@ Database.prototype.initialize = function() {
   this.monsters = this.__loadDefinitions("monsters");
 
   // Validate monsters
-  Object.entries(this.monsters).forEach(function([ key, value ]) {
+  Object.entries(this.monsters).forEach(function ([key, value]) {
     this.validator.validateMonster(key, value);
   }, this);
 
   // NPCs if they are enabled
-  if(CONFIG.WORLD.NPCS.ENABLED) {
+  if (CONFIG.WORLD.NPCS.ENABLED) {
     this.npcs = this.__loadNPCDefinitions("npcs");
   }
 
   // Spawns if they are enabled
-  if(CONFIG.WORLD.SPAWNS.ENABLED) {
+  //if (CONFIG.WORLD.SPAWNS.ENABLED) {
     this.__loadSpawnDefinitions("spawns");
-  }
+  //}
 
   this.__attachClockEvents("clock");
 
 }
 
-Database.prototype.__loadHouses = function(definition) {
+Database.prototype.__loadHouses = function (definition) {
 
   let json = JSON.parse(fs.readFileSync(getDataFile(definition, "definitions.json")));
   let houses = new Map();
 
-  Object.entries(json).forEach(function([ id, entry ]) {
+  Object.entries(json).forEach(function ([id, entry]) {
     houses.set(Number(id), new House(Number(id), entry));
   });
 
@@ -178,9 +178,9 @@ Database.prototype.__loadHouses = function(definition) {
 
 }
 
-Database.prototype.getHouse = function(hid) {
+Database.prototype.getHouse = function (hid) {
 
-  if(!this.houses.has(hid)) {
+  if (!this.houses.has(hid)) {
     return null;
   }
 
@@ -188,9 +188,9 @@ Database.prototype.getHouse = function(hid) {
 
 }
 
-Database.prototype.getCondition = function(name) {
+Database.prototype.getCondition = function (name) {
 
-  if(!this.conditions.hasOwnProperty(name)) {
+  if (!this.conditions.hasOwnProperty(name)) {
     return null;
   }
 
@@ -198,39 +198,56 @@ Database.prototype.getCondition = function(name) {
 
 }
 
-Database.prototype.createThing = function(id) {
+Database.prototype.createThing = function (id) {
 
   /*
    * Function Database.createThing
    * Creates a new thing from a particular identifier
    */
 
-  // The requested item identifier does not exist
-  if(!this.items.hasOwnProperty(id)) {
+  // El item no existe en la tabla de prototipos
+  if (!this.items.hasOwnProperty(id)) {
+    console.warn(`Database.createThing: item id ${id} no existe en this.items, devolviendo null.`);
+    return null;
+  }
+
+  // Obtenemos el prototipo una sola vez
+  let proto = this.getThingPrototype(id);
+
+  if (!proto) {
+    console.warn(`Database.createThing: getThingPrototype(${id}) devolvió null, devolviendo null.`);
     return null;
   }
 
   // Get the right constructor from the identifier
   let thing = this.__createClassFromId(id);
 
-  // Set the weight of pickupable items
-  if(thing.isPickupable()) {
-    thing.setWeight(thing.getPrototype().properties.weight);
+  // Si por algún motivo no se pudo crear la instancia
+  if (!thing) {
+    console.warn(`Database.createThing: __createClassFromId(${id}) devolvió null.`);
+    return null;
+  }
+
+  // Set the weight of pickupable items usando el proto (para no depender de Thing.getPrototype)
+  if (typeof proto.isPickupable === "function" && proto.isPickupable()) {
+    if (proto.properties && typeof proto.properties.weight !== "undefined") {
+      thing.setWeight(proto.properties.weight);
+    }
   }
 
   return thing;
 
 }
 
-Database.prototype.attachUniqueEvent = function(uid, thing) {
-	
+Database.prototype.attachUniqueEvent = function (uid, thing) {
+
   /*
    * Function Database.attachUniqueEvent
    * Attaches a unique event to a particular thing with a unique identifier
    */
 
   // No unique events assigned to this identifier
-  if(!this.__uniqueActions.hasOwnProperty(uid)) {
+  if (!this.__uniqueActions.hasOwnProperty(uid)) {
     return;
   }
 
@@ -239,27 +256,27 @@ Database.prototype.attachUniqueEvent = function(uid, thing) {
 
 }
 
-Database.prototype.parseItems = function(container, things) {
+Database.prototype.parseItems = function (container, things) {
 
   /*
    * Function Database.parseItems
    * Recursively parses items from JSON
    */
 
-  things.forEach(function(thing, index) {
+  things.forEach(function (thing, index) {
 
-    if(thing !== null) {
+    if (thing !== null) {
       return container.addThing(process.gameServer.database.parseThing(thing), index);
     }
-    
+
   }, this);
 
 }
 
-Database.prototype.getDoorEvent = function(aid) {
+Database.prototype.getDoorEvent = function (aid) {
 
   // Create a bucket to collect the functions
-  if(!this.doors.hasOwnProperty(aid)) {
+  if (!this.doors.hasOwnProperty(aid)) {
     return null;
   }
 
@@ -267,7 +284,7 @@ Database.prototype.getDoorEvent = function(aid) {
 
 }
 
-Database.prototype.parseThing = function(item) {
+Database.prototype.parseThing = function (item) {
 
   /*
    * Function Database.parseThing
@@ -278,36 +295,36 @@ Database.prototype.parseThing = function(item) {
   let thing = this.createThing(item.id);
 
   // Copy over the count
-  if(item.count) {
+  if (item.count) {
     thing.setCount(item.count);
   }
 
   // Recursively add items to the container
-  if(thing.isContainer()) {
+  if (thing.isContainer()) {
 
-    if(item.items) {
+    if (item.items) {
       this.parseItems(thing, item.items);
     }
 
-    if(item.content) {
+    if (item.content) {
       this.parseItems(thing, item.content);
     }
 
   }
 
   // Copy the item identifier
-  if(item.actionId) {
+  if (item.actionId) {
     thing.setActionId(item.actionId);
   }
 
-  if(item.duration) {
+  if (item.duration) {
     thing.setDuration(item.duration);
-    if(thing.isDecaying()) {
+    if (thing.isDecaying()) {
       thing.__scheduleDecay(item.duration);
     }
   }
 
-  if(item.content) {
+  if (item.content) {
     thing.setContent(item.content);
   }
 
@@ -315,7 +332,7 @@ Database.prototype.parseThing = function(item) {
 
 }
 
-Database.prototype.getZone = function(id) {
+Database.prototype.getZone = function (id) {
 
   /*
    * Function Database.getZone
@@ -323,7 +340,7 @@ Database.prototype.getZone = function(id) {
    */
 
   // Invalid identifier
-  if(!this.zones.hasOwnProperty(id)) {
+  if (!this.zones.hasOwnProperty(id)) {
     return null;
   }
 
@@ -331,7 +348,7 @@ Database.prototype.getZone = function(id) {
 
 }
 
-Database.prototype.getMonster = function(id) {
+Database.prototype.getMonster = function (id) {
 
   /*
    * Function Database.getMonster
@@ -339,7 +356,7 @@ Database.prototype.getMonster = function(id) {
    */
 
   // Does not exist
-  if(!this.monsters.hasOwnProperty(id)) {
+  if (!this.monsters.hasOwnProperty(id)) {
     return null;
   }
 
@@ -347,14 +364,14 @@ Database.prototype.getMonster = function(id) {
 
 }
 
-Database.prototype.getRune = function(id) {
+Database.prototype.getRune = function (id) {
 
   /*
    * Function Database.getRune
    * Returns the function that belongs to a rune with a particular ID
    */
 
-  if(!this.runes.hasOwnProperty(id)) {
+  if (!this.runes.hasOwnProperty(id)) {
     return null;
   }
 
@@ -362,14 +379,14 @@ Database.prototype.getRune = function(id) {
 
 }
 
-Database.prototype.getSpell = function(sid) {
+Database.prototype.getSpell = function (sid) {
 
   /*
    * Function Database.getRune
    * Returns the function that belongs to a rune with a particular ID
    */
 
-  if(!this.spells.hasOwnProperty(sid)) {
+  if (!this.spells.hasOwnProperty(sid)) {
     return null;
   }
 
@@ -377,7 +394,7 @@ Database.prototype.getSpell = function(sid) {
 
 }
 
-Database.prototype.getThingPrototype = function(id) {
+Database.prototype.getThingPrototype = function (id) {
 
   /*
    * Function Database.getThingPrototype
@@ -385,7 +402,7 @@ Database.prototype.getThingPrototype = function(id) {
    */
 
   // The item does not exist
-  if(!this.items.hasOwnProperty(id)) {
+  if (!this.items.hasOwnProperty(id)) {
     return null;
   }
 
@@ -393,7 +410,7 @@ Database.prototype.getThingPrototype = function(id) {
 
 }
 
-Database.prototype.getClientId = function(id) {
+Database.prototype.getClientId = function (id) {
 
   /*
    * Function Database.getClientId
@@ -402,7 +419,7 @@ Database.prototype.getClientId = function(id) {
 
   let proto = this.getThingPrototype(id);
 
-  if(proto === null) {
+  if (proto === null) {
     return 0;
   }
 
@@ -410,7 +427,7 @@ Database.prototype.getClientId = function(id) {
 
 }
 
-Database.prototype.__loadSpawnDefinitions = function(definition) {
+Database.prototype.__loadSpawnDefinitions = function (definition) {
 
   /*
    * Function Database.__loadSpawnDefinitions
@@ -421,7 +438,7 @@ Database.prototype.__loadSpawnDefinitions = function(definition) {
 
 }
 
-Database.prototype.__loadNPCDefinitions = function(definition) {
+Database.prototype.__loadNPCDefinitions = function (definition) {
 
   /*
    * Function Database.__loadNPCDefinitions
@@ -430,7 +447,7 @@ Database.prototype.__loadNPCDefinitions = function(definition) {
 
   let reference = new Object();
 
-  Object.entries(this.__readDataDefinition(definition)).forEach(function([ key, value ]) {
+  Object.entries(this.__readDataDefinition(definition)).forEach(function ([key, value]) {
     reference[key] = this.__readNPCDefinition(value);
   }, this);
 
@@ -440,7 +457,7 @@ Database.prototype.__loadNPCDefinitions = function(definition) {
 
 }
 
-Database.prototype.__readNPCDefinition = function(name) {
+Database.prototype.__readNPCDefinition = function (name) {
 
   /*
    * Function Database.getZone
@@ -456,7 +473,7 @@ Database.prototype.__readNPCDefinition = function(name) {
   let npc = new NPC(data);
 
   // If enabled add the NPC to the gameworld: otherwise just keep it in memory
-  if(name.enabled) {
+  if (name.enabled) {
     process.gameServer.world.addCreatureSpawn(npc, name.position);
   }
 
@@ -465,7 +482,7 @@ Database.prototype.__readNPCDefinition = function(name) {
 
 }
 
-Database.prototype.__loadDefinitions = function(definition) {
+Database.prototype.__loadDefinitions = function (definition) {
 
   /*
    * Function Database.__loadDefinitions
@@ -474,7 +491,7 @@ Database.prototype.__loadDefinitions = function(definition) {
 
   let reference = new Object();
 
-  Object.entries(this.__readDataDefinition(definition)).forEach(function([ key, value ]) {
+  Object.entries(this.__readDataDefinition(definition)).forEach(function ([key, value]) {
     reference[key] = require(getDataFile(definition, "definitions", value));
   });
 
@@ -484,7 +501,7 @@ Database.prototype.__loadDefinitions = function(definition) {
 
 }
 
-Database.prototype.__loadItemDefinitions = function(definition) {
+Database.prototype.__loadItemDefinitions = function (definition) {
 
   /*
    * Function Database.__loadItemDefinitions
@@ -494,26 +511,28 @@ Database.prototype.__loadItemDefinitions = function(definition) {
   let reference = new Object();
 
   // Create a thing prototype
-  Object.entries(this.__readDataDefinition(definition)).forEach(function([ key, value ]) {
+  Object.entries(this.__readDataDefinition(definition)).forEach(function ([key, value]) {
     reference[key] = new ThingPrototype(value);
   });
 
   return reference;
 
 }
+Database.prototype.__createClassFromId = function (id) {
 
-Database.prototype.__createClassFromId = function(id) {
+  const proto = this.getThingPrototype(id);
 
-  /*
-   * Function Database.__createClassFromId
-   * Creates the appropriate class entity for a particular identifier
-   */
+  // Solo comprobamos que exista el prototipo y sus propiedades,
+  // NO obligamos a que tenga "type".
+  if (!proto || proto.properties == null) {
+    console.warn(`Database.__createClassFromId: prototipo no encontrado o inválido para id ${id}.`);
+    return null;
+  }
 
-  // Create a wrapper for easy lookup
-  let proto = this.getThingPrototype(id);
+  let type = proto.properties.type;
 
-  // Specific mapping of thing types to classes
-  switch(proto.properties.type) {
+  // Si no hay type, dejamos que caiga al caso genérico.
+  switch (type) {
     case "corpse": return new Corpse(id, Number(proto.properties.containerSize));
     case "container": return new Container(id, Number(proto.properties.containerSize));
     case "fluidContainer": return new FluidContainer(id);
@@ -527,7 +546,7 @@ Database.prototype.__createClassFromId = function(id) {
 
 }
 
-Database.prototype.__attachPrototypeEvents = function(filepath) {
+Database.prototype.__attachPrototypeEvents = function (filepath) {
 
   /*
    * Function Database.__attachPrototypeEvents
@@ -542,27 +561,27 @@ Database.prototype.__attachPrototypeEvents = function(filepath) {
   let definitions = this.__readDataDefinition(filepath);
 
   // Read the definition
-  definitions.forEach(function(definition) {
+  definitions.forEach(function (definition) {
 
     // The callback is a function to be executed when the event is emitted
     let callback = require(getDataFile(filepath, "definitions", definition.callback));
-   
+
     // Single identifier
-    if(definition.id) {
+    if (definition.id) {
       definition.from = definition.to = definition.id;
     }
 
     // An array
-    if(definition.ids) {
-      definition.ids.forEach(function(id) {
+    if (definition.ids) {
+      definition.ids.forEach(function (id) {
         this.__addPrototypeEventListener(id, definition.on, callback);
       }, this);
     }
 
     // A range
-    if(definition.from && definition.to) {
+    if (definition.from && definition.to) {
 
-      for(let id = definition.from; id <= definition.to; id++) {
+      for (let id = definition.from; id <= definition.to; id++) {
         this.__addPrototypeEventListener(id, definition.on, callback);
       }
 
@@ -574,7 +593,7 @@ Database.prototype.__attachPrototypeEvents = function(filepath) {
 
 }
 
-Database.prototype.__addPrototypeEventListener = function(id, which, callback) {
+Database.prototype.__addPrototypeEventListener = function (id, which, callback) {
 
   /*
    * Function Database.__addPrototypeEventListener
@@ -583,13 +602,13 @@ Database.prototype.__addPrototypeEventListener = function(id, which, callback) {
 
   // Find the prototype and attach it
   let proto = this.getThingPrototype(id);
-  
+
   // Attach
   proto.on(which, callback);
 
 }
 
-Database.prototype.__attachClockEvents = function(filepath) {
+Database.prototype.__attachClockEvents = function (filepath) {
 
   /*
    * Function Database.__attachClockEvents
@@ -597,19 +616,19 @@ Database.prototype.__attachClockEvents = function(filepath) {
    */
 
   // Save all definitions
-  this.__readDataDefinition(filepath).forEach(function(definition) {
- 
-      // Read the function to memory
-      let callback = require(getDataFile(filepath, "definitions", definition.callback));
+  this.__readDataDefinition(filepath).forEach(function (definition) {
 
-      // Attach to event listener
-      process.gameServer.world.clock.on("time", callback);
+    // Read the function to memory
+    let callback = require(getDataFile(filepath, "definitions", definition.callback));
+
+    // Attach to event listener
+    process.gameServer.world.clock.on("time", callback);
 
   });
 
 }
 
-Database.prototype.__attachUniqueEvents = function(filepath) {
+Database.prototype.__attachUniqueEvents = function (filepath) {
 
   /*
    * Function Database.__attachUniqueEvents
@@ -620,10 +639,10 @@ Database.prototype.__attachUniqueEvents = function(filepath) {
   this.__uniqueActions = new Object();
 
   // Save all definitions
-  this.__readDataDefinition(filepath).forEach(function(definition) {
+  this.__readDataDefinition(filepath).forEach(function (definition) {
 
     // Create a bucket to collect the functions
-    if(!this.__uniqueActions.hasOwnProperty(definition.uid)) {
+    if (!this.__uniqueActions.hasOwnProperty(definition.uid)) {
       this.__uniqueActions[definition.uid] = new Array();
     }
 
@@ -639,14 +658,14 @@ Database.prototype.__attachUniqueEvents = function(filepath) {
 
 }
 
-Database.prototype.__readDataDefinition = function(definition) {
+Database.prototype.__readDataDefinition = function (definition) {
 
   /*
    * Function Database.__readDataDefinition
    * Loads a JSON definition file from a particular folder
    */
- 
-  return JSON.parse(fs.readFileSync(getDataFile(definition, "definitions.json")));
+  let json = JSON.parse(fs.readFileSync(getDataFile(definition, "definitions.json")));
+  return  json;
 
 }
 

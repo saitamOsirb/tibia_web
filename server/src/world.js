@@ -379,7 +379,7 @@ World.prototype.getTileFromWorldPosition = function(position) {
 }
 
 World.prototype.spawnCreature = function(spawn) {
-
+    console.log(spawn);
   /*
    * Function World.spawnCreature
    * Spawns a creature to the world from the configured spawn data
@@ -391,6 +391,7 @@ World.prototype.spawnCreature = function(spawn) {
 
   // Get the monster data (mid = monster identifier)
   let monster = new Monster(spawn);
+
 
   // Find an available tile for the player
   let tile = this.findAvailableTile(monster, Position.prototype.fromLiteral(spawn.position));

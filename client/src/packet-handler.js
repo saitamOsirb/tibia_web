@@ -699,9 +699,11 @@ PacketHandler.prototype.handleItemInformation = function(packet) {
   }
 
   // When debugging lets show the client and server identifier
-  if(gameClient.renderer.debugger.isActive()) {
+  //if(gameClient.renderer.debugger.isActive()) {
     message += " (SID: %s, CID: %s)".format(packet.sid, packet.cid);
-  }
+
+    //message += " (Position: %s)".format(packet.);
+  //}
 
   // Show a server message
   gameClient.interface.notificationManager.setServerMessage(

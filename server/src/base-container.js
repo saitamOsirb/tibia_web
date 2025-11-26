@@ -26,11 +26,23 @@ const BaseContainer = function(guid, size) {
   // Assign a global unique identifier to each container that is persistent
   this.guid = guid;
 
+  // Normalizamos el tamaño para evitar RangeError: Invalid array length
+  let normalizedSize = Number(size);
+
+  if (!Number.isFinite(normalizedSize) || normalizedSize <= 0) {
+    console.warn(
+      `BaseContainer: tamaño de contenedor inválido (${size}), usando tamaño por defecto 1.`
+    );
+    normalizedSize = 1;
+  }
+
+  normalizedSize = Math.floor(normalizedSize);
+
   // Each base container has particular size
-  this.size = size;
+  this.size = normalizedSize;
 
   // The slots that keep references to the items in the container
-  this.__slots = new Array(size).fill(null);
+  this.__slots = new Array(normalizedSize).fill(null);
 
   // The spectators that are presently viewing the base container and keep track of container updates
   this.spectators = new Set();
@@ -67,9 +79,9 @@ BaseContainer.prototype.isFull = function() {
    */
 
   // Go over all slots until we find an empty slot
-  for(let i = 0; i < this.__slots.length; i++) {
+  for (let i = 0; i < this.__slots.length; i++) {
 
-    if(this.__slots[i] === null) {
+    if (this.__slots[i] === null) {
       return false;
     }
 
@@ -88,7 +100,7 @@ BaseContainer.prototype.copyContents = function(container) {
 
   container.__slots.forEach(function(thing, index) {
 
-    if(thing !== null) {
+    if (thing !== null) {
       this.__setItem(thing, index);
     }
 
@@ -103,8 +115,8 @@ BaseContainer.prototype.isValidIndex = function(index) {
    * Returns true only if the index is within the container bounds
    */
 
-  // Within bounds
-  return (index >= 0) && (index < this.size);
+  // Within bounds (usamos this.__slots.length por si acaso)
+  return (index >= 0) && (index < this.__slots.length);
 
 }
 
@@ -127,7 +139,7 @@ BaseContainer.prototype.peekIndex = function(slotIndex) {
    */
 
   // Invalid index requested
-  if(!this.isValidIndex(slotIndex)) {
+  if (!this.isValidIndex(slotIndex)) {
     return null;
   }
 
@@ -145,7 +157,7 @@ BaseContainer.prototype.addThing = function(thing, index) {
   let currentThing = this.peekIndex(index);
 
   // Reference the parent container to the item
-  if(currentThing !== null && thing.isStackable()) {
+  if (currentThing !== null && thing.isStackable()) {
     return this.__addStackable(index, currentThing, thing);
   }
 
@@ -168,12 +180,12 @@ BaseContainer.prototype.removeIndex = function(index, count) {
   let thing = this.peekIndex(index);
 
   // There is nothing to remove
-  if(thing === null) {
+  if (thing === null) {
     return null;
   }
 
   // The thing is not stackable: remove the currently peeked at thing but return a reference to the item
-  if(!thing.isStackable()) {
+  if (!thing.isStackable()) {
     this.__remove(index);
     return thing;
   }
@@ -194,7 +206,7 @@ BaseContainer.prototype.deleteThing = function(thing) {
   let index = this.__slots.indexOf(thing);
 
   // The requested item does not exist in the container
-  if(index === -1) {
+  if (index === -1) {
     return -1;
   }
 
@@ -210,10 +222,10 @@ BaseContainer.prototype.addFirstEmpty = function(thing) {
    */
 
   // Go over the items
-  for(let i = 0; i < this.__slots.length; i++) {
+  for (let i = 0; i < this.__slots.length; i++) {
 
     // The slot is empty: add the new thing
-    if(this.peekIndex(i) === null) {
+    if (this.peekIndex(i) === null) {
       return this.addThing(thing, i);
     }
 
@@ -278,7 +290,7 @@ BaseContainer.prototype.__addStackable = function(index, currentItem, item) {
   let overflow = (currentItem.count + item.count) - Item.prototype.MAXIMUM_STACK_COUNT;
 
   // Overflow? We have to split the stack into a bigger and smaller pile
-  if(overflow > 0) {
+  if (overflow > 0) {
     this.__overflowStack(index, currentItem, overflow);
   } else {
     this.__replaceFungibleItem(index, currentItem, currentItem.count + item.count);
@@ -294,12 +306,12 @@ BaseContainer.prototype.__removeStackableItem = function(index, currentItem, cou
    */
 
   // More requested than available in the item
-  if(count > currentItem.count) {
+  if (count > currentItem.count) {
     return null;
   }
 
   // Exactly equal: still remove the item completely
-  if(count === currentItem.count) {
+  if (count === currentItem.count) {
     this.__remove(index);
     return currentItem;
   }

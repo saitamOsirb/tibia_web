@@ -7,7 +7,7 @@
 /* Contenedor de los botones (Stats, Battle, Outfit, Friends, Settings, Logout) */
 .equipment-buttons {
   display: grid;
-  grid-template-columns: repeat(4, 16px);  /* 👉 4 iconos por fila */
+  grid-template-columns: repeat(8, 20px);  /* 👉 4 iconos por fila */
   grid-auto-rows: 16px;
   gap: 2px;                                /* separación pequeñita */
   margin-top: 4px;
@@ -16,8 +16,8 @@
 
 /* Tamaño base de cada botón en la grilla */
 .equipment-buttons button {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   padding: 0;
   margin: 0;
 }

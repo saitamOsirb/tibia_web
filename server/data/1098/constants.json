@@ -13,6 +13,11 @@
     "YELLOW": 210,
     "WHITE": 215
   },
+  "BLOODTYPE": {
+    "BLOOD": 0,
+    "POISON": 1,
+    "NONE": 2
+  },
   "EFFECT": {
     "MAGIC": {
       "DRAWBLOOD": 1,

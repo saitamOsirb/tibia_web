@@ -50,7 +50,7 @@ if(require.main === module) {
     return process.exit(1);
   }
 
-  console.log("Starting NodeJS Forby Open Tibia Server.");
+  console.log("Starting NodeJS Open Tibia Server.");
   console.log("Creating server with version [[ %s ]].".format(CONFIG.SERVER.CLIENT_VERSION));
   console.log("Setting data directory to [[ %s ]].".format(getDataFile("")));
 
