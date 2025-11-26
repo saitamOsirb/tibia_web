@@ -8,6 +8,7 @@
     "attack": 1,
     "attackSlowness": 40,
     "defense": 5,
+    "speed": 60,
     "slowness": 20,
     "outfit": {
       "id": 21

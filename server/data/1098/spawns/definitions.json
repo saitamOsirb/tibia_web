@@ -1,6 +1,6 @@
 [
 {
-  "respawnTime": 10,
+  "respawnTime": 60,
   "mid": "rat",
   "position": {
     "x": 5437,

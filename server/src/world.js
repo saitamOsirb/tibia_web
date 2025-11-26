@@ -379,7 +379,7 @@ World.prototype.getTileFromWorldPosition = function(position) {
 }
 
 World.prototype.spawnCreature = function(spawn) {
-    console.log(spawn);
+
   /*
    * Function World.spawnCreature
    * Spawns a creature to the world from the configured spawn data
@@ -602,9 +602,13 @@ World.prototype.moveCreature = function(creature, position) {
 
   // Movement callback events
   creature.emit("move", tile);
+  let friction = tile.getFriction();
+  if (friction === null) {
+    friction = 100;
+  }
 
   // Step duration
-  let stepDuration = creature.getStepDuration(tile.getFriction());
+  let stepDuration = creature.getStepDuration(friction);
 
   // Write packet to all spectators
   let packet = new PacketWriter(PacketWriter.prototype.opcodes.ENTITY_MOVE).writeCreatureMove(creature.guid, position, stepDuration);

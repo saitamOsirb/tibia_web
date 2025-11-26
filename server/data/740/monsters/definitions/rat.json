@@ -15,6 +15,7 @@
   },
   "fluidType": 0,
   "experience": 50,
+  "speed": 30,
   "corpse": 2813,
   "behaviour": {
     "type": "HOSTILE",

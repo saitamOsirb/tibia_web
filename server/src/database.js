@@ -359,7 +359,6 @@ Database.prototype.getMonster = function (id) {
   if (!this.monsters.hasOwnProperty(id)) {
     return null;
   }
-
   return this.monsters[id];
 
 }
@@ -433,7 +432,6 @@ Database.prototype.__loadSpawnDefinitions = function (definition) {
    * Function Database.__loadSpawnDefinitions
    * Loads all the configured spawns and associated monsters
    */
-
   this.__readDataDefinition(definition).forEach(spawn => process.gameServer.world.spawnCreature(spawn));
 
 }

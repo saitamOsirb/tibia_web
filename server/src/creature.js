@@ -99,17 +99,14 @@ Creature.prototype.getStepDuration = function (friction) {
    * Math to calcualte the amount of frames to lock when walking (50MS tick)
    * See: https://tibia.fandom.com/wiki/Speed_Breakpoints
    */
-  console.log("friction:",friction);
-  if (friction == null) {
-    friction = 100;
-  }
+
   const A = 857.36;
   const B = 261.29;
   const C = -4795.009;
 
+  let speed = this.getSpeed();  
   // Logarithm of speed with some constants (never less than 1)
-  let calculatedStepSpeed = Math.max(1, Math.round(A * Math.log(this.getSpeed() + B) + C));
-
+  let calculatedStepSpeed = Math.max(1, Math.round(A * Math.log(speed + B) + C));
   return Math.ceil(Math.floor(1000 * friction / calculatedStepSpeed) / CONFIG.SERVER.MS_TICK_INTERVAL);
 
 }

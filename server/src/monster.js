@@ -6,8 +6,7 @@ const DamageMap = require("./damage-map");
 const Position = require("./position");
 const Behaviour = require("./behaviour");
 
-const Monster = function(spawn) {
-
+const Monster = function (spawn) {
   /*
    * Class Monster
    * Container for an attackable monster
@@ -15,10 +14,9 @@ const Monster = function(spawn) {
 
   // Fetch data from its prototype
   let data = process.gameServer.database.getMonster(spawn.mid);
-
   // Inherit from creature
   Creature.call(this, data.creatureStatistics);
-	
+
   // Save the monster spawn information
   this.spawn = spawn;
   this.position = spawn.position;
@@ -40,12 +38,12 @@ const Monster = function(spawn) {
   this.actions.add(this.handleActionTarget);
 
   // Sayings were configured
-  if(data.hasOwnProperty("sayings")) {
+  if (data.hasOwnProperty("sayings")) {
     this.actions.add(this.handleActionSpeak);
   }
 
   // Register specific callback events
-  if(data.events && data.events.length > 0) {
+  if (data.events && data.events.length > 0) {
     this.__registerEvents(data.events);
   }
 
@@ -53,7 +51,7 @@ const Monster = function(spawn) {
   this.spellActions = new ActionManager();
 
   // Add the spells
-  if(data.spells) {
+  if (data.spells) {
     this.__addSpells(data.spells);
   }
 
@@ -62,39 +60,39 @@ const Monster = function(spawn) {
 Monster.prototype = Object.create(Creature.prototype);
 Monster.prototype.constructor = Monster;
 
-Monster.prototype.setTarget = function(target) {
+Monster.prototype.setTarget = function (target) {
 
   this.behaviour.setTarget(target);
 
 }
 
-Monster.prototype.isTileOccupied = function(tile) {
+Monster.prototype.isTileOccupied = function (tile) {
 
   /*
    * Function Monster.isTileOccupied
    * Function evaluated for a tile whether it is occupied for the monster or not
    */
 
-  if(tile === null) {
+  if (tile === null) {
     return true;
   }
 
   // Tiles that block solid can never be walked on
-  if(tile.isBlockSolid()) {
+  if (tile.isBlockSolid()) {
     return true;
   }
 
-  if(tile.isProtectionZone()) {
+  if (tile.isProtectionZone()) {
     return true;
   }
 
   // The tile items contain a block solid (e.g., a wall)
-  if(tile.itemStack.isBlockSolid(this.behaviour.openDoors)) {
+  if (tile.itemStack.isBlockSolid(this.behaviour.openDoors)) {
     return true;
   }
 
   // Cannot pass through characters
-  if(tile.isOccupiedCharacters()) {
+  if (tile.isOccupiedCharacters()) {
     return true;
   }
 
@@ -102,7 +100,7 @@ Monster.prototype.isTileOccupied = function(tile) {
 
 }
 
-Monster.prototype.createCorpse = function() {
+Monster.prototype.createCorpse = function () {
 
   /*
    * Function Monster.createCorpse
@@ -115,12 +113,12 @@ Monster.prototype.createCorpse = function() {
   // Create a new corpse based on the monster type
   let corpse = process.gameServer.database.createThing(proto.corpse);
 
-  if(corpse.isDecaying()) {
+  if (corpse.isDecaying()) {
     corpse.scheduleDecay();
   }
 
   // Add loot to the corpse and schedule a decay event
-  if(corpse.constructor.name === "Corpse") {
+  if (corpse.constructor.name === "Corpse") {
     corpse.addLoot(proto.loot);
     this.damageMap.distributeExperienceAndLoot(this.getPrototype(), corpse.container.__slots.nullfilter());
   } else {
@@ -133,7 +131,7 @@ Monster.prototype.createCorpse = function() {
 
 }
 
-Monster.prototype.getPrototype = function() {
+Monster.prototype.getPrototype = function () {
 
   /*
    * Function Monster.getPrototype
@@ -144,7 +142,7 @@ Monster.prototype.getPrototype = function() {
 
 }
 
-Monster.prototype.getTarget = function() {
+Monster.prototype.getTarget = function () {
 
   /*
    * Function Creature.getTarget
@@ -155,7 +153,7 @@ Monster.prototype.getTarget = function() {
 
 }
 
-Monster.prototype.push = function(position) {
+Monster.prototype.push = function (position) {
 
   /*
    * Function Monster.push
@@ -163,21 +161,25 @@ Monster.prototype.push = function(position) {
    */
 
   // Cannot push when the creature is moving
-  if(this.isMoving()) {
+  if (this.isMoving()) {
     return;
   }
 
-  if(!position.besides(this.position)) {
+  if (!position.besides(this.position)) {
     return;
   }
 
   let tile = process.gameServer.world.getTileFromWorldPosition(position);
 
-  if(tile === null || tile.id === 0) {
+  if (tile === null || tile.id === 0) {
     return;
   }
+  let friction =tile.getFriction();
+  if (friction === null) {
+    friction = 100;
+  }
 
-  let lockDuration = this.getStepDuration(tile.getFriction());
+  let lockDuration = this.getStepDuration(friction);
 
   // Determine the slowness
   let slowness = this.position.isDiagonal(position) ? 2 * lockDuration : lockDuration;
@@ -190,7 +192,7 @@ Monster.prototype.push = function(position) {
 
 }
 
-Monster.prototype.handleActionMove = function() {
+Monster.prototype.handleActionMove = function () {
 
   /*
    * Function Monster.handleActionMove
@@ -201,16 +203,19 @@ Monster.prototype.handleActionMove = function() {
   let tile = this.behaviour.getNextMoveTile();
 
   // Invalid tile was returned: do nothing
-  if(tile === null) {
+  if (tile === null) {
     return;
   }
 
-  if(tile.id === 0) {
+  if (tile.id === 0) {
     return;
   }
 
-  let lockDuration = this.getStepDuration(tile.getFriction());
-
+  let friction = tile.getFriction();
+  if (friction === null) {
+    friction = 100;
+  }
+  let lockDuration = this.getStepDuration(friction);
   // Number of frames to lock
   let slowness = this.position.isDiagonal(tile.position) ? 2 * lockDuration : lockDuration;
 
@@ -219,10 +224,10 @@ Monster.prototype.handleActionMove = function() {
 
   // Lock this function for a number of frames
   this.actions.lock(this.handleActionMove, slowness);
-
+  
 }
 
-Monster.prototype.handleActionTarget = function() {
+Monster.prototype.handleActionTarget = function () {
 
   /*
    * Function Monster.handleActionTarget
@@ -236,7 +241,7 @@ Monster.prototype.handleActionTarget = function() {
 
 }
 
-Monster.prototype.handleActionSpeak = function() {
+Monster.prototype.handleActionSpeak = function () {
 
   /*
    * Function Monster.handleActionSpeak
@@ -246,7 +251,7 @@ Monster.prototype.handleActionSpeak = function() {
   let sayings = this.getProperty("sayings");
 
   // Say a random thing
-  if(Math.random() > 0.15) {
+  if (Math.random() > 0.15) {
     this.internalCreatureSay(sayings.texts.random(), CONST.COLOR.ORANGE);
   }
 
@@ -255,7 +260,7 @@ Monster.prototype.handleActionSpeak = function() {
 
 }
 
-Monster.prototype.handleActionAttack = function() {
+Monster.prototype.handleActionAttack = function () {
 
   /*
    * Function Monster.handleActionAttack
@@ -263,12 +268,12 @@ Monster.prototype.handleActionAttack = function() {
    */
 
   // No target or not besides target: do nothing
-  if(!this.behaviour.is(this.behaviour.BEHAVIOUR.HOSTILE)) {
+  if (!this.behaviour.is(this.behaviour.BEHAVIOUR.HOSTILE)) {
     return this.lockAction(this.handleActionAttack, ActionManager.prototype.GLOBAL_COOLDOWN);
   }
 
   // We do not have a target
-  if(!this.behaviour.hasTarget()) {
+  if (!this.behaviour.hasTarget()) {
     return this.lockAction(this.handleActionAttack, ActionManager.prototype.GLOBAL_COOLDOWN);
   }
 
@@ -276,17 +281,17 @@ Monster.prototype.handleActionAttack = function() {
   let target = this.getTarget();
 
   // Target is offline or missing
-  if(!this.behaviour.canSeeTarget()) {
+  if (!this.behaviour.canSeeTarget()) {
     return this.lockAction(this.handleActionAttack, ActionManager.prototype.GLOBAL_COOLDOWN);
   }
 
   // Put the target player in combat
-  if(target.constructor.name === "Player") {
+  if (target.constructor.name === "Player") {
     target.combatLock.lockSeconds(target.COMBAT_LOCK_SECONDS);
   }
 
   // Not yet besides the target
-  if(!this.behaviour.isBesidesTarget()) {
+  if (!this.behaviour.isBesidesTarget()) {
     return this.lockAction(this.handleActionAttack, ActionManager.prototype.GLOBAL_COOLDOWN);
   }
 
@@ -301,13 +306,13 @@ Monster.prototype.handleActionAttack = function() {
 
 }
 
-Monster.prototype.hasTarget = function() {
+Monster.prototype.hasTarget = function () {
 
   return this.behaviour.hasTarget();
 
 }
 
-Monster.prototype.handleSpellAction = function() {
+Monster.prototype.handleSpellAction = function () {
 
   /*
    * Function Monster.handleSpellAction
@@ -315,7 +320,7 @@ Monster.prototype.handleSpellAction = function() {
    */
 
   // Must have a target before casting any spells
-  if(!this.behaviour.hasTarget()) {
+  if (!this.behaviour.hasTarget()) {
     return;
   }
 
@@ -323,15 +328,15 @@ Monster.prototype.handleSpellAction = function() {
   this.lockAction(this.handleSpellAction, ActionManager.prototype.GLOBAL_COOLDOWN);
 
   // Can not shoot at the target (line of sight blocked)
-  if(!this.isInLineOfSight(this.behaviour.target)) {
+  if (!this.isInLineOfSight(this.behaviour.target)) {
     return;
   }
 
   // Go over all the available spells in the spellbook
-  this.spellActions.forEach(function(spell) {
+  this.spellActions.forEach(function (spell) {
 
     // This means there is a failure to cast the spell
-    if(Math.random() > spell.chance) {
+    if (Math.random() > spell.chance) {
       return;
     }
 
@@ -339,15 +344,15 @@ Monster.prototype.handleSpellAction = function() {
     let cast = process.gameServer.database.getSpell(spell.id);
 
     // If casting was succesful lock it with the specified cooldown
-    if(cast.call(this, spell)) {
+    if (cast.call(this, spell)) {
       this.spellActions.lock(spell, spell.cooldown);
     }
 
   }, this);
-  
+
 }
 
-Monster.prototype.isDistanceWeaponEquipped = function() {
+Monster.prototype.isDistanceWeaponEquipped = function () {
 
   /*
    * Function Monster.isDistanceWeaponEquipped
@@ -358,7 +363,7 @@ Monster.prototype.isDistanceWeaponEquipped = function() {
 
 }
 
-Monster.prototype.decreaseHealth = function(attacker, amount, color) {
+Monster.prototype.decreaseHealth = function (attacker, amount, color) {
 
   /*
    * Function Monster.decreaseHealth
@@ -376,7 +381,7 @@ Monster.prototype.decreaseHealth = function(attacker, amount, color) {
 
 }
 
-Monster.prototype.getProperty = function(property) {
+Monster.prototype.getProperty = function (property) {
 
   /*
    * Function Monster.getProperty
@@ -385,7 +390,7 @@ Monster.prototype.getProperty = function(property) {
 
   let proto = this.getPrototype();
 
-  if(!proto.hasOwnProperty(property)) {
+  if (!proto.hasOwnProperty(property)) {
     return null;
   }
 
@@ -393,7 +398,7 @@ Monster.prototype.getProperty = function(property) {
 
 }
 
-Monster.prototype.__addSpells = function(spells) {
+Monster.prototype.__addSpells = function (spells) {
 
   /*
    * Function Monster.__addSpells
