@@ -341,6 +341,11 @@ Player.prototype.directionToPosition = function(direction) {
 
 }
 
+Player.prototype.getSlowness = function() {
+  // Si tienes speed en Player:
+  const speed = this.getSpeed ? this.getSpeed() : this.speed || 100;
+  return Math.max(1, Math.floor(100 * (100 / speed)));
+};
 Player.prototype.handleActionMove = function(direction) {
 
   /*
